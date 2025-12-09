@@ -20,12 +20,20 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        /* 全屏模式下的样式 */
+        body.fullscreen-mode {
+            padding: 0;
+            overflow: hidden;
         }
 
         header {
             text-align: center;
             margin-bottom: 40px;
             max-width: 800px;
+            z-index: 10;
         }
 
         h1 {
@@ -48,6 +56,7 @@
             gap: 24px;
             width: 100%;
             max-width: 1000px;
+            z-index: 10;
         }
 
         .card {
@@ -93,6 +102,78 @@
             text-align: center;
             font-size: 0.9rem;
             opacity: 0.6;
+            z-index: 10;
+        }
+
+        /* 全屏GA容器 */
+        .fullscreen-ga-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #0f0f1b;
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+        }
+
+        .fullscreen-ga-container.active {
+            display: flex;
+        }
+
+        .ga-header {
+            background: rgba(30, 30, 50, 0.8);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(100, 100, 255, 0.3);
+        }
+
+        .close-ga-btn {
+            background: #ff2a6d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .close-ga-btn:hover {
+            background: #ff0055;
+        }
+
+        .ga-iframe-wrapper {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .ga-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* 原来的GA卡片按钮样式 */
+        .launch-btn {
+            background: #00f0ff;
+            color: #0f0f1b;
+            border: none;
+            padding: 10px 24px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .launch-btn:hover {
+            background: #00ccee;
+            transform: scale(1.05);
         }
     </style>
 </head>
@@ -123,17 +204,55 @@
             <p>HTML/CSS/JavaScript  · Node.js · Python · Matlab</p>
         </div>
 
-        <!-- 卡片 4：联系我 -->
+        <!-- 卡片 4：联系我 (保留B站主页) -->
         <div class="card" id="contact">
             <h2>联系我</h2>
             <p>欢迎通过邮箱或社交平台与我交流！</p>
-            <a href="https://space.bilibili.com/382738043">进入我的B站主页</a>
+            <a href="https://space.bilibili.com/382738043">我的B站主页</a>
+        </div>
+
+        <!-- 卡片：遗传算法项目 -->
+        <div class="card">
+            <h2>遗传算法可视化平台</h2>
+            <p>交互式学习遗传算法的交叉与变异操作</p>
+            <button class="launch-btn" onclick="openFullscreenGA()">
+                ▶ 全屏体验项目
+            </button>
         </div>
     </div>
 
     <footer>
         © 2025 斜阳不知归 | 个人主页
     </footer>
+
+    <!-- 全屏GA容器 -->
+    <div class="fullscreen-ga-container" id="fullscreenGA">
+        <div class="ga-header">
+            <h3>🧬 遗传算法交叉变异可视化学习平台</h3>
+            <button class="close-ga-btn" onclick="closeFullscreenGA()">×</button>
+        </div>
+        <div class="ga-iframe-wrapper">
+            <iframe class="ga-iframe" src="GA.html" title="遗传算法可视化学习平台"></iframe>
+        </div>
+    </div>
+
+    <script>
+        function openFullscreenGA() {
+            document.body.classList.add('fullscreen-mode');
+            document.getElementById('fullscreenGA').classList.add('active');
+            document.querySelector('.cards-container').style.opacity = '0.1';
+            document.querySelector('header').style.opacity = '0.1';
+            document.querySelector('footer').style.opacity = '0.1';
+        }
+
+        function closeFullscreenGA() {
+            document.body.classList.remove('fullscreen-mode');
+            document.getElementById('fullscreenGA').classList.remove('active');
+            document.querySelector('.cards-container').style.opacity = '1';
+            document.querySelector('header').style.opacity = '1';
+            document.querySelector('footer').style.opacity = '1';
+        }
+    </script>
 
 </body>
 </html>
