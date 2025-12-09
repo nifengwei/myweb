@@ -219,6 +219,15 @@
                 ▶ 全屏体验项目
             </button>
         </div>
+
+        <!-- 卡片：星空粒子项目 -->
+        <div class="card">
+            <h2>星空粒子系统</h2>
+            <p>基于Three.js的120万粒子星空系统，支持手势交互</p>
+            <button class="launch-btn" onclick="openFullscreenStar()">
+                ▶ 全屏体验项目
+            </button>
+        </div>
     </div>
 
     <footer>
@@ -236,6 +245,17 @@
         </div>
     </div>
 
+    <!-- 全屏Star容器 -->
+    <div class="fullscreen-ga-container" id="fullscreenStar">
+        <div class="ga-header">
+            <h3>✨ 星空粒子系统</h3>
+            <button class="close-ga-btn" onclick="closeFullscreenStar()">×</button>
+        </div>
+        <div class="ga-iframe-wrapper">
+            <iframe class="ga-iframe" src="star.html" title="星空粒子系统"></iframe>
+        </div>
+    </div>
+
     <script>
         function openFullscreenGA() {
             document.body.classList.add('fullscreen-mode');
@@ -248,6 +268,22 @@
         function closeFullscreenGA() {
             document.body.classList.remove('fullscreen-mode');
             document.getElementById('fullscreenGA').classList.remove('active');
+            document.querySelector('.cards-container').style.opacity = '1';
+            document.querySelector('header').style.opacity = '1';
+            document.querySelector('footer').style.opacity = '1';
+        }
+
+        function openFullscreenStar() {
+            document.body.classList.add('fullscreen-mode');
+            document.getElementById('fullscreenStar').classList.add('active');
+            document.querySelector('.cards-container').style.opacity = '0.1';
+            document.querySelector('header').style.opacity = '0.1';
+            document.querySelector('footer').style.opacity = '0.1';
+        }
+
+        function closeFullscreenStar() {
+            document.body.classList.remove('fullscreen-mode');
+            document.getElementById('fullscreenStar').classList.remove('active');
             document.querySelector('.cards-container').style.opacity = '1';
             document.querySelector('header').style.opacity = '1';
             document.querySelector('footer').style.opacity = '1';
