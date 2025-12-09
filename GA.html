@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>遗传算法交叉变异可视化学习平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .control-panel {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .visualization-area {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .panel-title {
+            color: #667eea;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+        
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            width: 100%;
+            margin: 8px 0;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .chromosome-container {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .chromosome {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        
+        .gene {
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 3px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .gene.binary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+        
+        .gene.permutation {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+        
+        .gene.real {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+        
+        .gene.crossover-point {
+            background: linear-gradient(135deg, #ffd700, #ffb347) !important;
+            color: #333;
+            animation: glow 1.5s infinite alternate;
+        }
+        
+        .gene.mutation-point {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52) !important;
+            color: white;
+            animation: pulse 1.2s infinite;
+        }
+        
+        .gene.selected {
+            border: 3px solid #ffd700;
+            transform: scale(1.1);
+        }
+        
+        .gene.parent1 {
+            box-shadow: inset 0 0 0 2px #3498db;
+        }
+        
+        .gene.parent2 {
+            box-shadow: inset 0 0 0 2px #e74c3c;
+        }
+        
+        .gene.offspring {
+            box-shadow: inset 0 0 0 2px #2ecc71;
+        }
+        
+        @keyframes glow {
+            from { box-shadow: 0 0 5px #ffd700; }
+            to { box-shadow: 0 0 20px #ffd700, 0 0 30px #ffd700; }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+        }
+        
+        .step {
+            text-align: center;
+            flex: 1;
+            padding: 10px;
+        }
+        
+        .step.active {
+            background: rgba(102, 126, 234, 0.3);
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .info-box {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .current-state {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 215, 0, 0.2);
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: bold;
+            color: #ffd700;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+        }
+        
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+        }
+        
+        .binary-legend { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .permutation-legend { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .real-legend { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+        .crossover-legend { background: linear-gradient(135deg, #ffd700, #ffb347); }
+        .mutation-legend { background: linear-gradient(135deg, #ff6b6b, #ee5a52); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧬 遗传算法交叉变异可视化学习平台</h1>
+            <p class="subtitle">专注于交叉和变异操作的交互式学习</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="control-panel">
+                <h2 class="panel-title">控制面板</h2>
+                
+                <label for="encodingType">编码方式</label>
+                <select id="encodingType">
+                    <option value="binary">二进制编码 (0/1)</option>
+                    <option value="permutation">排列编码 (1-8序列)</option>
+                    <option value="real">实数编码 (0-10浮点数)</option>
+                </select>
+                
+                <label for="crossoverType">交叉方式</label>
+                <select id="crossoverType">
+                    <option value="single">单点交叉</option>
+                    <option value="double">双点交叉</option>
+                    <option value="uniform">均匀交叉</option>
+                </select>
+                
+                <button onclick="generateParents()">🔄 生成父代</button>
+                <button onclick="performCrossover()" class="crossover-btn">✂️ 执行交叉</button>
+                <button onclick="performMutation()" class="mutation-btn">🎲 执行变异</button>
+                <button onclick="resetAll()">🗑️ 重置</button>
+                
+                <div class="info-box">
+                    <h3>交叉操作说明</h3>
+                    <p>单点交叉：在染色体上随机选择一个点，交换两个父代个体该点后的基因</p>
+                    <p>双点交叉：选择两个点，交换两点之间的基因片段</p>
+                    <p>均匀交叉：每个基因位以一定概率来自任一父代</p>
+                </div>
+                
+                <div class="info-box">
+                    <h3>变异操作说明</h3>
+                    <p>变异是遗传算法中引入随机性的关键操作，增加种群多样性</p>
+                    <p>变异率通常设为0.01-0.1之间</p>
+                </div>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color binary-legend"></div>
+                        <span>二进制</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color permutation-legend"></div>
+                        <span>排列</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color real-legend"></div>
+                        <span>实数</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color crossover-legend"></div>
+                        <span>交叉点</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color mutation-legend"></div>
+                        <span>变异点</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="visualization-area">
+                <h2 style="text-align: center; margin-bottom: 20px;">可视化区域</h2>
+                
+                <div class="current-state" id="currentState">
+                    🚀 选择编码方式并生成父代开始学习
+                </div>
+                
+                <div class="step-indicator">
+                    <div class="step" id="step1">父代生成</div>
+                    <div class="step" id="step2">交叉操作</div>
+                    <div class="step" id="step3">变异操作</div>
+                </div>
+                
+                <div id="visualizationContent">
+                    <div style="text-align: center; color: #aaa; padding: 50px;">
+                        <h3>等待操作...</h3>
+                        <p>点击"生成父代"开始</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let parents = [];
+        let offspring = [];
+        let currentStep = 0;
+        
+        // 染色体类
+        class Chromosome {
+            constructor(genes) {
+                this.genes = genes;
+                this.id = Math.random().toString(36).substr(2, 6);
+            }
+        }
+        
+        // 生成父代
+        function generateParents() {
+            const encodingType = document.getElementById('encodingType').value;
+            parents = [];
+            
+            for (let i = 0; i < 2; i++) {
+                let genes = [];
+                
+                switch (encodingType) {
+                    case 'binary':
+                        for (let j = 0; j < 8; j++) {
+                            genes.push(Math.random() > 0.5 ? 1 : 0);
+                        }
+                        break;
+                    case 'permutation':
+                        genes = Array.from({length: 8}, (_, i) => i + 1);
+                        // Fisher-Yates shuffle
+                        for (let j = genes.length - 1; j > 0; j--) {
+                            const k = Math.floor(Math.random() * (j + 1));
+                            [genes[j], genes[k]] = [genes[k], genes[j]];
+                        }
+                        break;
+                    case 'real':
+                        for (let j = 0; j < 8; j++) {
+                            genes.push(parseFloat((Math.random() * 10).toFixed(2)));
+                        }
+                        break;
+                }
+                
+                parents.push(new Chromosome(genes));
+            }
+            
+            currentStep = 1;
+            updateVisualization();
+            updateStepIndicator();
+            document.getElementById('currentState').textContent = '✅ 两个父代个体已生成';
+        }
+        
+        // 执行交叉
+        function performCrossover() {
+            if (parents.length < 2) {
+                alert("请先生成父代个体！");
+                return;
+            }
+            
+            const crossoverType = document.getElementById('crossoverType').value;
+            const parent1 = parents[0];
+            const parent2 = parents[1];
+            
+            let offspring1, offspring2;
+            let crossoverPoints = [];
+            
+            switch (crossoverType) {
+                case 'single':
+                    const point1 = Math.floor(Math.random() * parent1.genes.length);
+                    crossoverPoints = [point1];
+                    offspring1 = new Chromosome([
+                        ...parent1.genes.slice(0, point1),
+                        ...parent2.genes.slice(point1)
+                    ]);
+                    offspring2 = new Chromosome([
+                        ...parent2.genes.slice(0, point1),
+                        ...parent1.genes.slice(point1)
+                    ]);
+                    break;
+                    
+                case 'double':
+                    let point2a = Math.floor(Math.random() * parent1.genes.length);
+                    let point2b = Math.floor(Math.random() * parent1.genes.length);
+                    if (point2a > point2b) [point2a, point2b] = [point2b, point2a];
+                    crossoverPoints = [point2a, point2b];
+                    
+                    offspring1 = new Chromosome([
+                        ...parent1.genes.slice(0, point2a),
+                        ...parent2.genes.slice(point2a, point2b),
+                        ...parent1.genes.slice(point2b)
+                    ]);
+                    offspring2 = new Chromosome([
+                        ...parent2.genes.slice(0, point2a),
+                        ...parent1.genes.slice(point2a, point2b),
+                        ...parent2.genes.slice(point2b)
+                    ]);
+                    break;
+                    
+                case 'uniform':
+                    const mask = [];
+                    for (let i = 0; i < parent1.genes.length; i++) {
+                        mask.push(Math.random() > 0.5);
+                    }
+                    
+                    offspring1 = new Chromosome(parent1.genes.map((gene, i) => 
+                        mask[i] ? gene : parent2.genes[i]
+                    ));
+                    offspring2 = new Chromosome(parent2.genes.map((gene, i) => 
+                        mask[i] ? gene : parent1.genes[i]
+                    ));
+                    break;
+            }
+            
+            offspring = [offspring1, offspring2];
+            currentStep = 2;
+            updateVisualization();
+            updateStepIndicator();
+            document.getElementById('currentState').textContent = `✂️ ${getCrossoverName(crossoverType)}完成！`;
+        }
+        
+        // 执行变异
+        function performMutation() {
+            if (offspring.length === 0) {
+                alert("请先执行交叉操作！");
+                return;
+            }
+            
+            const encodingType = document.getElementById('encodingType').value;
+            
+            // 对子代进行变异
+            for (let i = 0; i < offspring.length; i++) {
+                for (let j = 0; j < offspring[i].genes.length; j++) {
+                    // 10%的概率进行变异
+                    if (Math.random() < 0.1) {
+                        switch (encodingType) {
+                            case 'binary':
+                                offspring[i].genes[j] = offspring[i].genes[j] === 0 ? 1 : 0;
+                                break;
+                            case 'permutation':
+                                // 找到另一个位置进行交换
+                                const swapIdx = Math.floor(Math.random() * offspring[i].genes.length);
+                                [offspring[i].genes[j], offspring[i].genes[swapIdx]] = 
+                                [offspring[i].genes[swapIdx], offspring[i].genes[j]];
+                                break;
+                            case 'real':
+                                // 小幅改变数值
+                                offspring[i].genes[j] += (Math.random() - 0.5) * 2;
+                                if (offspring[i].genes[j] < 0) offspring[i].genes[j] = 0;
+                                if (offspring[i].genes[j] > 10) offspring[i].genes[j] = 10;
+                                break;
+                        }
+                    }
+                }
+            }
+            
+            currentStep = 3;
+            updateVisualization();
+            updateStepIndicator();
+            document.getElementById('currentState').textContent = '🎲 变异操作完成！';
+        }
+        
+        // 重置
+        function resetAll() {
+            parents = [];
+            offspring = [];
+            currentStep = 0;
+            updateVisualization();
+            updateStepIndicator();
+            document.getElementById('currentState').textContent = '🚀 选择编码方式并生成父代开始学习';
+        }
+        
+        // 更新可视化显示
+        function updateVisualization() {
+            const content = document.getElementById('visualizationContent');
+            
+            if (parents.length === 0) {
+                content.innerHTML = '<div style="text-align: center; color: #aaa; padding: 50px;"><h3>等待操作...</h3><p>点击"生成父代"开始</p></div>';
+                return;
+            }
+            
+            let html = '';
+            
+            // 显示父代
+            html += '<div class="chromosome-container">';
+            html += '<h3>👨‍👩‍👧‍👦 父代个体</h3>';
+            
+            parents.forEach((parent, idx) => {
+                html += `<div style="margin: 10px 0;"><strong>父代 #${idx + 1}</strong></div>`;
+                html += '<div class="chromosome">';
+                
+                parent.genes.forEach((gene, geneIdx) => {
+                    let geneClass = `gene ${document.getElementById('encodingType').value} parent${idx + 1}`;
+                    html += `<div class="${geneClass}">${typeof gene === 'number' ? gene.toFixed(2) : gene}</div>`;
+                });
+                
+                html += '</div>';
+            });
+            
+            html += '</div>';
+            
+            // 显示交叉点（如果已执行交叉）
+            if (currentStep >= 2) {
+                const crossoverType = document.getElementById('crossoverType').value;
+                html += '<div class="chromosome-container">';
+                html += `<h3>✂️ ${getCrossoverName(crossoverType)}结果</h3>`;
+                
+                offspring.forEach((child, idx) => {
+                    html += `<div style="margin: 10px 0;"><strong>子代 #${idx + 1}</strong></div>`;
+                    html += '<div class="chromosome">';
+                    
+                    child.genes.forEach((gene, geneIdx) => {
+                        let geneClass = `gene ${document.getElementById('encodingType').value} offspring`;
+                        html += `<div class="${geneClass}">${typeof gene === 'number' ? gene.toFixed(2) : gene}</div>`;
+                    });
+                    
+                    html += '</div>';
+                });
+                
+                html += '</div>';
+            }
+            
+            // 显示变异结果（如果已执行变异）
+            if (currentStep >= 3) {
+                html += '<div class="chromosome-container">';
+                html += '<h3>🎲 变异后结果</h3>';
+                
+                offspring.forEach((child, idx) => {
+                    html += `<div style="margin: 10px 0;"><strong>最终子代 #${idx + 1}</strong></div>`;
+                    html += '<div class="chromosome">';
+                    
+                    child.genes.forEach((gene, geneIdx) => {
+                        let geneClass = `gene ${document.getElementById('encodingType').value} offspring`;
+                        // 这里可以添加变异点的标记逻辑，但简化起见不添加
+                        html += `<div class="${geneClass}">${typeof gene === 'number' ? gene.toFixed(2) : gene}</div>`;
+                    });
+                    
+                    html += '</div>';
+                });
+                
+                html += '</div>';
+            }
+            
+            content.innerHTML = html;
+        }
+        
+        // 更新步骤指示器
+        function updateStepIndicator() {
+            for (let i = 1; i <= 3; i++) {
+                const step = document.getElementById(`step${i}`);
+                step.classList.remove('active');
+                if (i <= currentStep) {
+                    step.classList.add('active');
+                }
+            }
+        }
+        
+        // 获取交叉操作名称
+        function getCrossoverName(type) {
+            switch (type) {
+                case 'single': return '单点交叉';
+                case 'double': return '双点交叉';
+                case 'uniform': return '均匀交叉';
+                default: return '交叉';
+            }
+        }
+        
+        // 页面加载时的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化
+            updateStepIndicator();
+        });
+    </script>
+</body>
+</html>
